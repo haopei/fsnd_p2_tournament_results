@@ -4,6 +4,7 @@
 
 from tournament import *
 
+
 def testDeleteMatches():
     deleteMatches()
     print "1. Old matches can be deleted."
@@ -11,6 +12,7 @@ def testDeleteMatches():
 
 def testDelete():
     deleteMatches()
+    deleteVotes()
     deletePlayers()
     print "2. Player records can be deleted."
 
@@ -112,17 +114,42 @@ def testPairings():
     [id1, id2, id3, id4] = [row[0] for row in standings]
     reportMatch(id1, id2)
     reportMatch(id3, id4)
-    pairings = swissPairings()
+    pairings = swissPairings()  # returns list of tuple: [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4)]
+
     if len(pairings) != 2:
         raise ValueError(
             "For four players, swissPairings should return two pairs.")
+
+    # assign variables to pairing
     [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4)] = pairings
+
     correct_pairs = set([frozenset([id1, id3]), frozenset([id2, id4])])
     actual_pairs = set([frozenset([pid1, pid2]), frozenset([pid3, pid4])])
     if correct_pairs != actual_pairs:
         raise ValueError(
             "After one match, players with one win should be paired.")
     print "8. After one match, players with one win are paired."
+
+
+# Extra test
+def testVotes():
+    standings = playerStandings()
+    [id1, id2, id3, id4] = [row[0] for row in standings]
+
+    # feint majority votes to candidate id2
+    winning_candidate = id2
+    castVote(id1, winning_candidate)
+    castVote(id2, winning_candidate)
+    castVote(id3, id4)
+    castVote(id4, winning_candidate)
+
+    # return the actual player with most votes from the database
+    actual_winner = getPlayerOfTheTournament()
+
+    if actual_winner != winning_candidate:
+        raise ValueError(
+            "The most voted candidate should appear as the winner of the 'Player of the Tournament' award.")
+    print "9. (Extra test) After all players cast votes, the 'Player of the Tournament' (most votes) is returned."
 
 
 if __name__ == '__main__':
@@ -134,6 +161,7 @@ if __name__ == '__main__':
     testStandingsBeforeMatches()
     testReportMatches()
     testPairings()
-    print "Success!  All tests pass!"
+    testVotes()
+    print "Success! All tests pass!"
 
 
