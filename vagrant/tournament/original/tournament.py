@@ -21,6 +21,16 @@ def deleteMatches():
     return
 
 
+def deleteVotes():
+    """Remove all vote records from the database."""
+    conn = connect()
+    c = conn.cursor()
+    # c.execute('DELETE FROM votes;')
+    conn.commit()
+    conn.close()
+    return
+
+
 def deletePlayers():
     """Remove all the player records from the database."""
     conn = connect()
@@ -35,7 +45,7 @@ def countPlayers():
     """Returns the number of players currently registered."""
     conn = connect()
     c = conn.cursor()
-    c.execute('SELECT count(*) FROM players;')
+    c.execute('SELECT count(*) AS registered_players FROM players;')
     result = c.fetchone()[0]
     conn.close()
     return result
@@ -50,10 +60,9 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-
     conn = connect()
     c = conn.cursor()
-    c.execute('INSERT INTO players (name) VALUES (%s)', (name,))
+    c.execute('INSERT INTO players(name) VALUES(%s)', (name,))
     conn.commit()
     conn.close()
     return
@@ -75,10 +84,9 @@ def playerStandings():
 
     conn = connect()
     c = conn.cursor()
-    c.execute('select * from player_standings;')
+    c.execute('SELECT * FROM winners;')
     result = c.fetchall()
     conn.close()
-
     return result
 
 
@@ -92,7 +100,16 @@ def reportMatch(winner, loser):
 
     conn = connect()
     c = conn.cursor()
-    c.execute('insert into matches (winner, loser) values (%s, %s)', (winner, loser,))
+
+    # create row in match table
+    c.execute('INSERT INTO matches (winner, loser) VALUES (%s, %s)', (winner, loser,))
+
+    # update each player's match count
+    c.execute('UPDATE players SET matches = matches + 1 WHERE id = %s OR id = %s', (winner, loser,))
+
+    # update winner's win count
+    c.execute('UPDATE players SET wins = wins + 1 WHERE id = %s', (winner,))
+
     conn.commit()
     conn.close()
     return
@@ -116,14 +133,37 @@ def swissPairings():
 
     conn = connect()
     c = conn.cursor()
-    c.execute('select * from swiss_pairing;')
+    c.execute('SELECT * FROM same_wins;')
     result = c.fetchall()
     conn.close()
-
     return result
 
 
+def castVote(voter_id, candidate_id):
+    """Records a player's vote for whom he endorses for the 'Player of the Tournament' award.
+
+    Args:
+        voter: the id of the player who is voting
+        candidate: the id of the player candidate who receives the vote
+    """
+
+    conn = connect()
+    c = conn.cursor()
+    c.execute('INSERT INTO votes (voter_id, candidate_id) VALUES (%s, %s)', (voter_id, candidate_id,))
+    conn.commit()
+    conn.close()
+    return
 
 
+def getPlayerOfTheTournament():
+    """Returns the player with the highest count of votes casted by tournament participants.
+        After the tournament, all participants vote on a 'Player of the Tournament'.
+    """
 
-
+    conn = connect()
+    c = conn.cursor()
+    c.execute('SELECT candidate_id, count(candidate_id) AS vote_count FROM vote_tally GROUP BY candidate_id ORDER BY vote_count DESC LIMIT 1;')
+    result = c.fetchone()[0]
+    conn.commit()
+    conn.close()
+    return result

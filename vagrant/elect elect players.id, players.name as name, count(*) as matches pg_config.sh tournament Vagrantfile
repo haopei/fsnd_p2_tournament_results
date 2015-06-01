@@ -1,0 +1,7 @@
+ player_id | player_name | win_count | rownum | row_number | player_id | player_name | win_count | rownum | row_number 
+-----------+-------------+-----------+--------+------------+-----------+-------------+-----------+--------+------------
+         5 | Philip      |        12 |      1 |          1 |         5 | Philip      |        12 |      1 |          1
+         1 | Jeff        |        17 |      3 |          2 |         1 | Jeff        |        17 |      3 |          2
+         2 | Adarsh      |        19 |      5 |          3 |         2 | Adarsh      |        19 |      5 |          3
+(3 rows)
+

@@ -7,59 +7,114 @@
 -- these lines here.
 
 
-CREATE DATABASE tournament;
+create database tournament;
 
+\c tournament
 
--- Connect to the database
-\c tournament;
+create table players (
+  id serial primary key,
+  name text
+);
 
-
--- Table: Players
---  shows each player's matches and wins
-CREATE TABLE players (
-  id serial PRIMARY KEY,
-  name text,
-  matches integer default 0,
-  wins integer default 0
+create table matches (
+  id serial primary key,
+  winner integer references players (id),
+  loser integer references players (id)
 );
 
 
--- Table: Matches
---  records the winner and loser of each match.
-CREATE TABLE matches (
-  id serial PRIMARY KEY,
-  loser integer REFERENCES players (id),
-  winner integer REFERENCES players (id)
-);
+
+create view player_match_count AS
+  select
+    players.id,
+    count(*) as match_count
+  from players join matches
+  on players.id = matches.winner OR players.id = matches.loser
+  group by players.id;
 
 
--- Table: Votes
---  shows each player's vote for sportsmanship award
-CREATE TABLE votes (
-  id serial PRIMARY KEY,
-  voter_id integer REFERENCES players (id),
-  candidate_id integer REFERENCES players (id)
-);
+create view player_win_count as
+  select
+    players.id,
+    count(*) as win_count
+  from players join matches
+  on players.id = matches.winner
+  group by players.id;
+
+create view player_lose_count as
+  select
+    players.id,
+    count(*) as lose_count
+  from  players join matches
+  on players.id = matches.loser
+  group by players.id;
 
 
---  shows total votes per candidate
-CREATE VIEW vote_tally AS
-  SELECT players.name, votes.candidate_id, votes.voter_id
-  FROM players join votes
-  ON players.id = votes.candidate_id;
+
+  -- so we got the match count and win count for all players, via the two views above. Now, we can join these two views with
+  -- the player table to achieve the overall standings info!!!!!!!!
+
+create view player_standings as
+  select
+    players.id as player_id,
+    players.name as player_name,
+    COALESCE(player_win_count.win_count, (0)) as win_count,
+    COALESCE(player_match_count.match_count, (0)) as match_count
+  from
+    players
+      left join player_match_count
+        on players.id = player_match_count.id
+      left join player_win_count
+        on player_match_count.id = player_win_count.id
+  order by win_count desc;
+
+-- select every nth row in player_standings
+create view standings_odd as
+  select *
+  from (
+      select player_id, player_name, win_count, row_number() over (order by win_count) as rownum
+      from player_standings
+    ) as t
+  where t.rownum % 2 = 0
+  order by win_count desc;
+
+-- select every nth row in player_standings
+create view standings_even as
+  select *
+  from (
+      select player_id, player_name, win_count, row_number() over (order by win_count) as rownum
+      from player_standings
+    ) as t
+  where t.rownum % 2 != 0
+  order by win_count desc;
 
 
--- Returns a list
---  of pairs of players
---  who have the same number of wins.
---  Used by swissPairing()
-CREATE VIEW same_wins AS
-  SELECT
-    players.id AS p1_id,
-    players.name AS p1_name,
-    players_2.id AS p2_id,
-    players_2.name AS p2_name
-  FROM players
-  LEFT JOIN players players_2
-  ON players.wins = players_2.wins
-  WHERE players.id > players_2.id;  -- prevents pairing of the same player
+-- swisspairing
+create view swiss_pairing as
+  select
+    even.player_id as p1,
+    even.player_name as name1,
+    odd.player_id as p2,
+    odd.player_name as name2
+  from
+    (
+      select *, row_number() over (order by win_count) as row_number from standings_even) as even
+    join
+    (
+      select *, row_number() over (order by win_count) as row_number from standings_odd) as odd
+  on even.row_number = odd.row_number;
+
+
+-- SELECT
+--   id,
+--   name,
+--   (SELECT count(*) FROM matches WHERE players.id = matches.winner) AS wins,
+--   (SELECT count(*) FROM matches WHERE players.id = matches.winner OR players.id = matches.loser) AS matches
+-- FROM players
+-- ORDER BY wins DESC;
+
+-- CREATE VIEW player_wins AS
+--   SELECT winner AS player_id,
+--          COUNT(*) AS wins
+--   FROM matches
+--   GROUP BY winner;
