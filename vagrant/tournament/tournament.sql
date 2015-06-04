@@ -9,13 +9,17 @@
 
 create database tournament;
 
+-- Connect to the database
 \c tournament
 
+
+-- Players table: records player identity
 create table players (
   id serial primary key,
   name text
 );
 
+-- Matches table: records match results
 create table matches (
   id serial primary key,
   winner integer references players (id),
@@ -23,7 +27,15 @@ create table matches (
 );
 
 
+-- Votes table: records player votes
+create table votes (
+  id serial primary key,
+  voter integer references players (id),
+  candidate integer references players (id)
+);
 
+
+-- Returns the number of matches played, per player
 create view player_match_count AS
   select
     players.id,
@@ -33,6 +45,7 @@ create view player_match_count AS
   group by players.id;
 
 
+-- Returns the number of matches won, per player
 create view player_win_count as
   select
     players.id,
@@ -41,6 +54,8 @@ create view player_win_count as
   on players.id = matches.winner
   group by players.id;
 
+
+-- Returns the number of matches lost, per player
 create view player_lose_count as
   select
     players.id,
@@ -51,9 +66,9 @@ create view player_lose_count as
 
 
 
-  -- so we got the match count and win count for all players, via the two views above. Now, we can join these two views with
-  -- the player table to achieve the overall standings info!!!!!!!!
 
+-- Returns each player's win count and match count
+--   Dependencies: player_win_count, player_match_count
 create view player_standings as
   select
     players.id as player_id,
@@ -68,7 +83,9 @@ create view player_standings as
         on player_match_count.id = player_win_count.id
   order by win_count desc;
 
--- select every nth row in player_standings
+
+-- Returns every odd row of player_standings
+-- used for swiss_pairing view
 create view standings_odd as
   select *
   from (
@@ -78,7 +95,9 @@ create view standings_odd as
   where t.rownum % 2 = 0
   order by win_count desc;
 
--- select every nth row in player_standings
+
+-- Returns every even row of player_standings
+-- used for swiss_pairing view
 create view standings_even as
   select *
   from (
@@ -89,7 +108,8 @@ create view standings_even as
   order by win_count desc;
 
 
--- swisspairing
+-- Returns the matchup of players with similar number of wins
+--   Dependencies: standings_odd, standings_even
 create view swiss_pairing as
   select
     even.player_id as p1,
@@ -103,18 +123,3 @@ create view swiss_pairing as
     (
       select *, row_number() over (order by win_count) as row_number from standings_odd) as odd
   on even.row_number = odd.row_number;
-
-
--- SELECT
---   id,
---   name,
---   (SELECT count(*) FROM matches WHERE players.id = matches.winner) AS wins,
---   (SELECT count(*) FROM matches WHERE players.id = matches.winner OR players.id = matches.loser) AS matches
--- FROM players
--- ORDER BY wins DESC;
-
--- CREATE VIEW player_wins AS
---   SELECT winner AS player_id,
---          COUNT(*) AS wins
---   FROM matches
---   GROUP BY winner;

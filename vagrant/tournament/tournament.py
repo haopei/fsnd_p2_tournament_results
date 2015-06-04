@@ -13,16 +13,17 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
+
     conn = connect()
     c = conn.cursor()
     c.execute('DELETE FROM matches;')
     conn.commit()
     conn.close()
-    return
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
+
     conn = connect()
     c = conn.cursor()
     c.execute('DELETE FROM players;')
@@ -31,8 +32,20 @@ def deletePlayers():
     return
 
 
+def deleteVotes():
+    """Remove all the vote records from the database."""
+
+    conn = connect()
+    c = conn.cursor()
+    c.execute('DELETE FROM votes;')
+    conn.commit()
+    conn.close()
+    return
+
+
 def countPlayers():
     """Returns the number of players currently registered."""
+
     conn = connect()
     c = conn.cursor()
     c.execute('SELECT count(*) FROM players;')
@@ -116,14 +129,41 @@ def swissPairings():
 
     conn = connect()
     c = conn.cursor()
+
     c.execute('select * from swiss_pairing;')
     result = c.fetchall()
     conn.close()
-
     return result
 
 
+def castVote(voter, candidate):
+    """Records a player's vote casted for the Player of the Tournament award.
+
+    Args:
+        voter: the id of the player who casts the vote
+        candidate: the id of the player for whom the voted is casted
+    """
+
+    conn = connect()
+    c = conn.cursor()
+    c.execute('insert into votes (voter, candidate) values (%s, %s);', (voter, candidate))
+    conn.commit()
+    conn.close()
 
 
+def getAwardWinner():
+    """Returns the winner of the Player of the Tournament award
 
+    In a tournament, participant players may cast a vote for whom
+    they believe is an exemplery player of the game. The winner
+    of the award is one who exhibited outstanding game ethics.
+    """
 
+    conn = connect()
+    c = conn.cursor()
+    query = 'select candidate, count(*) as vote_count from votes group by candidate order by vote_count desc limit 1;'
+    c.execute(query)
+    result = c.fetchone()[0]
+    conn.commit()
+    conn.close()
+    return result

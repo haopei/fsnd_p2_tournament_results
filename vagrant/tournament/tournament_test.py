@@ -4,6 +4,7 @@
 
 from tournament import *
 
+
 def testDeleteMatches():
     deleteMatches()
     print "1. Old matches can be deleted."
@@ -11,6 +12,7 @@ def testDeleteMatches():
 
 def testDelete():
     deleteMatches()
+    deleteVotes()
     deletePlayers()
     print "2. Player records can be deleted."
 
@@ -87,6 +89,7 @@ def testReportMatches():
     registerPlayer("Cathy Burton")
     registerPlayer("Diane Grant")
     standings = playerStandings()
+    # print standings
     [id1, id2, id3, id4] = [row[0] for row in standings]
     reportMatch(id1, id2)
     reportMatch(id3, id4)
@@ -113,7 +116,6 @@ def testPairings():
     reportMatch(id1, id2)
     reportMatch(id3, id4)
     pairings = swissPairings()
-    print len(pairings)
     if len(pairings) != 2:
         raise ValueError(
             "For four players, swissPairings should return two pairs.")
@@ -126,6 +128,45 @@ def testPairings():
     print "8. After one match, players with one win are paired."
 
 
+# Extra test
+def testAwardWinner():
+    """Each player may cast a vote for whom he/she decides is the player of the tournament."""
+
+    deleteMatches()
+    deletePlayers()
+
+    registerPlayer("Ajmer")
+    registerPlayer("Joshua")
+    registerPlayer("Adam")
+    registerPlayer("Marissa")
+    registerPlayer("Nadia")
+    registerPlayer("Krysta")
+
+    players = playerStandings()
+
+    # unpack players into a list of their ids
+    [p1, p2, p3, p4, p5, p6] = [row[0] for row in players]
+
+    # the hand-selected winner for this test
+    selected_winner = p6
+
+    # Players cast votes for selected_winner
+    castVote(p1, selected_winner)
+    castVote(p2, selected_winner)
+    castVote(p3, selected_winner)
+    castVote(p4, selected_winner)
+    castVote(p5, selected_winner)
+    castVote(p6, p4)
+
+    # get player id with most votes
+    actual_winner = getAwardWinner()
+
+    # compare actual winner with selected winner
+    if actual_winner != selected_winner:
+        raise ValueError("The actual_winner and selected_winner should be the same person.")
+    print "9. (Extra test) After all players cast votes, the player of the tournament is returned."
+
+
 if __name__ == '__main__':
     testDeleteMatches()
     testDelete()
@@ -135,6 +176,5 @@ if __name__ == '__main__':
     testStandingsBeforeMatches()
     testReportMatches()
     testPairings()
+    testAwardWinner()
     print "Success!  All tests pass!"
-
-
