@@ -35,17 +35,19 @@ The `player_standings` view returns a list of players ordered by their number of
 
 This means that every two players in sequence is an appropriate pair of opponents for the `swiss_pairing`. In the above example, ideally Bruno is paired with Cathy, while Boots is paired with Diane for the next round.
 
- The standings_odd and standings_even views divide the `player_standings` according to their even/odd nth position.
+The standings_odd and standings_even views divide the `player_standings` according to their even/odd nth position.
 
 `select * from standings_odd`
- | player_id | player_name | win_count | rownum |
- | --------- | ----------- | --------- | ------ |
+
+| player_id | player_name | win_count | rownum |
+| --------- | ----------- | --------- | ------ |
 | 1 | Bruno | 4 | 1 |
 | 3 | Boots | 2 | 3 |
 
 `select * from standings_even`
- | player_id | player_name | win_count | rownum |
- | --------- | ----------- | --------- | ------ |
+
+| player_id | player_name | win_count | rownum |
+| --------- | ----------- | --------- | ------ |
 | 2 | Cathy | 3 | 2 |
 | 4 | Diane | 1 | 4 |
 
