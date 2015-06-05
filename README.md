@@ -15,9 +15,9 @@ Players may cast a single vote for another player, besides himself/herself, to b
 
 | Function | Description |
 | -------- | ----------- |
-| castVote(voter, candidate) | Records a voter's vote and the candidate for whom he/she votes. |
-|getAwardWinner() | Returns the player id with the most votes, i.e. the Player of the Tournament winner |
-| testAwardWinner() | Tests if the award winner is returned correctly. |
+| `castVote(voter, candidate)` | Records a voter's vote and the candidate for whom he/she votes. |
+| `getAwardWinner()` | Returns the player id with the most votes, i.e. the Player of the Tournament winner |
+| `testAwardWinner()` | Tests if the award winner is returned correctly. |
 
 ## Swiss Pairings
 
@@ -27,6 +27,7 @@ The `swiss_pairing` view is used to generate the swiss pairing, and depends on t
 The `player_standings` view returns a list of players ordered by their number of wins.
 
 | player_id | player_name | win_count | match_count |
+| --------- | ----------- | --------- | ----------- |
 | 1 | Bruno | 4 | 6 |
 | 2 | Cathy | 3 | 6 |
 | 3 | Boots | 2 | 6 |
@@ -38,11 +39,13 @@ This means that every two players in sequence is an appropriate pair of opponent
 
 `select * from standings_odd`
  | player_id | player_name | win_count | rownum |
+ | --------- | ----------- | --------- | ------ |
 | 1 | Bruno | 4 | 1 |
 | 3 | Boots | 2 | 3 |
 
 `select * from standings_even`
  | player_id | player_name | win_count | rownum |
+ | --------- | ----------- | --------- | ------ |
 | 2 | Cathy | 3 | 2 |
 | 4 | Diane | 1 | 4 |
 
