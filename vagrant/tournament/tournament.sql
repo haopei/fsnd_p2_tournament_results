@@ -11,6 +11,7 @@
 DROP DATABASE if exists tournament;
 CREATE DATABASE tournament;
 
+
 -- Connect to the database
 \c tournament
 
@@ -20,6 +21,7 @@ CREATE TABLE players (
   id serial PRIMARY KEY,
   name text
 );
+
 
 -- Matches table: records match results
 CREATE TABLE matches (

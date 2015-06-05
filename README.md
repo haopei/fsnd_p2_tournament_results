@@ -8,16 +8,18 @@
  4. Run `psql`, followed by `\i tournament/tournament.sql` to build and access the database
  5. Exit `psql` cli with `\q1` and run tests with `python tournament/tournament_test.py`
 
+## Views
 
-## Extra Test: Voting for Player of the Tournament
+| View Name | columns | Description |
+| --------- | ------- | ----------- |
+| player_match_count | player_id, match_count | Returns the number of matches played, per player |
+| player_win_count | player_id, win_count |
+| player_lose_count | player_id, lose_count |
+| player_standings | player_id, player_name, win_count, match_count |
+| standings_odd | player_id, player_name, win_count, rownum | Returns odd rows from player_standings |
+| standings_even | player_id, player_name, win_count, rownum | Returns even rows from player_standings |
+| swiss_pairing | p1, name1, p2, name2 | Returns the matchup of payers with similar number of wins |
 
-Players may cast a single vote for another player, besides himself/herself, to be the "Player of the Tournament". This involves the following additional functions:
-
-| Function | Description |
-| -------- | ----------- |
-| `castVote(voter, candidate)` | Records a voter's vote and the candidate for whom he/she votes. |
-| `getAwardWinner()` | Returns the player id with the most votes, i.e. the Player of the Tournament winner |
-| `testAwardWinner()` | Tests if the award winner is returned correctly. |
 
 ## Swiss Pairings
 
@@ -52,3 +54,13 @@ The standings_odd and standings_even views divide the `player_standings` accordi
 | 4 | Diane | 1 | 4 |
 
 Finally, to return the swiss pairing, we join `standings_odd` and `standings_even` pair the players according to their corresponding nth row. For example, both Bruno and Cathy are the 1st row in their respective tables, while Boots and Diane are in the 2nd row.
+
+## Extra Test: Voting for Player of the Tournament
+
+Players may cast a single vote for another player, besides himself/herself, to be the "Player of the Tournament". This involves the following additional functions:
+
+| Function | Description |
+| -------- | ----------- |
+| `castVote(voter, candidate)` | Records a voter's vote and the candidate for whom he/she votes. |
+| `getAwardWinner()` | Returns the player id with the most votes, i.e. the Player of the Tournament winner |
+| `testAwardWinner()` | Tests if the award winner is returned correctly. |
