@@ -13,9 +13,9 @@
 | View Name | columns | Description |
 | --------- | ------- | ----------- |
 | player_match_count | player_id, match_count | Returns the number of matches played, per player |
-| player_win_count | player_id, win_count |
-| player_lose_count | player_id, lose_count |
-| player_standings | player_id, player_name, win_count, match_count |
+| player_win_count | player_id, win_count | Returns the number of matches won, per player |
+| player_lose_count | player_id, lose_count | Returns the number of matches lost, per player |
+| player_standings | player_id, player_name, win_count, match_count | Returns each player's win count and match count. Dependencies: player_win_count, player_match_count |
 | standings_odd | player_id, player_name, win_count, rownum | Returns odd rows from player_standings |
 | standings_even | player_id, player_name, win_count, rownum | Returns even rows from player_standings |
 | swiss_pairing | p1, name1, p2, name2 | Returns the matchup of payers with similar number of wins |
