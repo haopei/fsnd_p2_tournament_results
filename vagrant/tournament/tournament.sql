@@ -7,6 +7,8 @@
 -- these lines here.
 
 
+-- Reset database by dropping/creating it, if it already exists
+DROP DATABASE if exists tournament;
 CREATE DATABASE tournament;
 
 -- Connect to the database
