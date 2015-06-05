@@ -32,17 +32,6 @@ def deletePlayers():
     return
 
 
-def deleteVotes():
-    """Remove all the vote records from the database."""
-
-    conn = connect()
-    c = conn.cursor()
-    c.execute('DELETE FROM votes;')
-    conn.commit()
-    conn.close()
-    return
-
-
 def countPlayers():
     """Returns the number of players currently registered."""
 
@@ -75,8 +64,8 @@ def registerPlayer(name):
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
+    The first entry in the list should be the player in first place,
+    or a player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -88,7 +77,7 @@ def playerStandings():
 
     conn = connect()
     c = conn.cursor()
-    c.execute('select * from player_standings;')
+    c.execute('SELECT * FROM player_standings;')
     result = c.fetchall()
     conn.close()
 
@@ -105,7 +94,7 @@ def reportMatch(winner, loser):
 
     conn = connect()
     c = conn.cursor()
-    c.execute('insert into matches (winner, loser) values (%s, %s)', (winner, loser,))
+    c.execute('INSERT INTO matches (winner, loser) VALUES (%s, %s)', (winner, loser))
     conn.commit()
     conn.close()
     return
@@ -130,12 +119,14 @@ def swissPairings():
     conn = connect()
     c = conn.cursor()
 
-    c.execute('select * from swiss_pairing;')
+    c.execute('SELECT * FROM swiss_pairing;')
     result = c.fetchall()
     conn.close()
     return result
 
 
+# Extras
+#   The three functions below is used for test #9.
 def castVote(voter, candidate):
     """Records a player's vote casted for the Player of the Tournament award.
 
@@ -146,9 +137,23 @@ def castVote(voter, candidate):
 
     conn = connect()
     c = conn.cursor()
-    c.execute('insert into votes (voter, candidate) values (%s, %s);', (voter, candidate))
+    c.execute('INSERT INTO votes (voter, candidate) VALUES (%s, %s);', (voter, candidate))
     conn.commit()
     conn.close()
+
+
+def deleteVotes():
+    """Remove all the vote records from the database.
+        Vote records are used to determine the winner of
+        the Player of the Tournament award.
+    """
+
+    conn = connect()
+    c = conn.cursor()
+    c.execute('DELETE FROM votes;')
+    conn.commit()
+    conn.close()
+    return
 
 
 def getAwardWinner():
@@ -161,7 +166,13 @@ def getAwardWinner():
 
     conn = connect()
     c = conn.cursor()
-    query = 'select candidate, count(*) as vote_count from votes group by candidate order by vote_count desc limit 1;'
+    query = """
+        SELECT candidate, count(*)
+        AS vote_count
+        FROM votes
+        GROUP BY candidate
+        ORDER BY vote_count desc
+        LIMIT 1;"""
     c.execute(query)
     result = c.fetchone()[0]
     conn.commit()

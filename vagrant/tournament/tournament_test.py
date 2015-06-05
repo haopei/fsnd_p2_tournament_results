@@ -89,7 +89,6 @@ def testReportMatches():
     registerPlayer("Cathy Burton")
     registerPlayer("Diane Grant")
     standings = playerStandings()
-    # print standings
     [id1, id2, id3, id4] = [row[0] for row in standings]
     reportMatch(id1, id2)
     reportMatch(id3, id4)
@@ -150,7 +149,7 @@ def testAwardWinner():
     # the hand-selected winner for this test
     selected_winner = p6
 
-    # Players cast votes for selected_winner
+    # Most players cast votes for selected_winner
     castVote(p1, selected_winner)
     castVote(p2, selected_winner)
     castVote(p3, selected_winner)
@@ -164,7 +163,7 @@ def testAwardWinner():
     # compare actual winner with selected winner
     if actual_winner != selected_winner:
         raise ValueError("The actual_winner and selected_winner should be the same person.")
-    print "9. (Extra test) After all players cast votes, the player of the tournament is returned."
+    print "9. (Extra) After all players cast votes, the 'Player of the Tournament' is returned."
 
 
 if __name__ == '__main__':
